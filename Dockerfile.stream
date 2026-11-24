@@ -1,0 +1,32 @@
+# Image du serveur d'écoute en continu (Pod GPU RunPod, port 8000 exposé en HTTP)
+FROM runpod/base:0.4.0-cuda11.8.0
+
+SHELL ["/bin/bash", "-c"]
+WORKDIR /app
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    ffmpeg \
+    libsndfile1 \
+    && rm -rf /var/lib/apt/lists/*
+
+RUN python3 -m pip install --no-cache-dir --upgrade pip && \
+    python3 -m pip install --no-cache-dir "numpy<2" && \
+    python3 -m pip install --no-cache-dir \
+    torch==2.1.2 torchaudio==2.1.2 --index-url https://download.pytorch.org/whl/cu118 && \
+    python3 -m pip install --no-cache-dir \
+    transformers==4.38.2 \
+    accelerate==0.27.2 \
+    soundfile==0.12.1 \
+    fastapi==0.110.0 \
+    "uvicorn[standard]==0.29.0"
+
+# Modèle pré-téléchargé dans l'image : démarrage rapide
+RUN python3 -c "\
+from transformers import AutoProcessor, AutoModelForCTC; \
+m = 'rabah2026/wav2vec2-large-xlsr-53-arabic-quran-v_final'; \
+AutoProcessor.from_pretrained(m); AutoModelForCTC.from_pretrained(m); print('Model cached')"
+
+COPY audio_utils.py ctc_utils.py engine.py stream_session.py stream_server.py /app/
+
+EXPOSE 8000
+CMD ["uvicorn", "stream_server:app", "--host", "0.0.0.0", "--port", "8000"]

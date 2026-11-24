@@ -29,6 +29,8 @@ print('Model cached successfully')\
 "
 
 ADD audio_utils.py /audio_utils.py
+ADD ctc_utils.py /ctc_utils.py
+ADD engine.py /engine.py
 ADD handler.py /handler.py
 
 CMD ["python3", "-u", "/handler.py"]
