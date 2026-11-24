@@ -28,6 +28,7 @@ AutoModelForCTC.from_pretrained(model_name); \
 print('Model cached successfully')\
 "
 
+ADD audio_utils.py /audio_utils.py
 ADD handler.py /handler.py
 
 CMD ["python3", "-u", "/handler.py"]
